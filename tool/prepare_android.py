@@ -8,7 +8,7 @@ for permission in ['android.permission.INTERNET', 'android.permission.READ_CONTA
     if permission not in text:
         text = text.replace('<manifest xmlns:android="http://schemas.android.com/apk/res/android">',
                             '<manifest xmlns:android="http://schemas.android.com/apk/res/android">\n    <uses-permission android:name="'+permission+'"/>')
-text = re.sub(r'android:label="[^"]+"', 'android:label="CallCircle v2"', text, count=1)
+text = re.sub(r'android:label="[^"]+"', 'android:label="CallCircle"', text, count=1)
 receivers = '''
         <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" />
         <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver">

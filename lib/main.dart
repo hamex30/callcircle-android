@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'contact_import_screen.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
@@ -60,6 +62,9 @@ class _CallCircleHomeState extends State<CallCircleHome> {
       ..addJavaScriptChannel('CallCircleLink', onMessageReceived: (message) {
         _openLink(message.message);
       })
+      ..addJavaScriptChannel('CallCircleContacts', onMessageReceived: (message) {
+        if (message.message == 'import') _importPhoneContacts();
+      })
       ..setNavigationDelegate(NavigationDelegate(
         onNavigationRequest: (request) {
           final uri = Uri.tryParse(request.url);
@@ -91,6 +96,20 @@ class _CallCircleHomeState extends State<CallCircleHome> {
     await controller.loadFlutterAsset('assets/callcircle.html');
     final raw = _preferences?.getString(_storageKey);
     if (raw != null) await _schedule(raw);
+  }
+
+  Future<void> _importPhoneContacts() async {
+    if (!mounted) return;
+    try {
+      final selected = await Navigator.of(context).push<List<SelectedPhoneContact>>(
+        MaterialPageRoute(builder: (_) => const ContactImportScreen()),
+      );
+      if (!mounted || selected == null || selected.isEmpty || _web == null) return;
+      final payload = jsonEncode(selected.map((c) => c.toJson()).toList());
+      await _web!.runJavaScript('window.importPhoneContacts($payload);');
+    } catch (_) {
+      if (mounted) _message('Could not import contacts. Please try again.');
+    }
   }
 
   Future<void> _openLink(String url) async {

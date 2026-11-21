@@ -1,4 +1,4 @@
-# CallCircle — Android prototype
+# CallCircle v2 — Android prototype
 
 A private call reminder app, created for an Android phone. Source for a Flutter Android wrapper around the included mobile UI.
 
@@ -35,3 +35,25 @@ flutter run
 
 ## Privacy
 Contact records remain on the phone in app preferences/WebView storage and are exported only on user request. No online account, analytics or server is used. WhatsApp and White Calling links launch external services.
+
+
+## Version 2: Import people from Samsung/Android contacts
+
+Tap **Choose from phone contacts**, approve the one-time **read contacts** permission,
+search and tick multiple people, choose the appropriate number if someone has
+several, then tap **Continue**. Select a starting frequency, relationship and
+calling method for the imported group. Edit individual people afterward.
+
+Only selected names, phone numbers and contact IDs are saved inside CallCircle;
+the app does not upload your address book. It asks only for READ_CONTACTS and
+never alters your phone's address book. Re-importing the same phone contact or
+number skips duplicates. Denying permission leaves manual entry available.
+
+Version 2 has a separate Android package ID (`com.hamex.callcircle2`) and label
+(`CallCircle v2`) to avoid overwriting or deleting Version 1's locally stored
+contacts. You can keep both prototypes installed. Existing Version 1 data is
+not automatically migrated; if needed, restore a CallCircle backup in v2.
+
+These are test builds; they are not configured with a stable production signing
+key. For reliable future in-place updates, configure a private release keystore
+using GitHub Actions secrets before distributing the app.

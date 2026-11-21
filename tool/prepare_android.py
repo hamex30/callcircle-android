@@ -26,8 +26,8 @@ gradle = root / 'android/app/build.gradle.kts'
 text = gradle.read_text()
 text = text.replace('compileSdk = flutter.compileSdkVersion', 'compileSdk = 36')
 text = text.replace('minSdk = flutter.minSdkVersion', 'minSdk = 24')
-# Version 2 installs separately from the old prototype, so existing local data is safe.
-text = text.replace('applicationId = "com.hamex.callcircle"', 'applicationId = "com.hamex.callcircle2"')
+# Restore the original application ID so this build targets the original CallCircle app.
+# A matching signing certificate is also required for an in-place Android upgrade.
 if 'isCoreLibraryDesugaringEnabled' not in text:
     text = text.replace('compileOptions {', 'compileOptions {\n        isCoreLibraryDesugaringEnabled = true', 1)
 if 'coreLibraryDesugaring("com.android.tools:desugar_jdk_libs' not in text:

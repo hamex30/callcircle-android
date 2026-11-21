@@ -1,3 +1,11 @@
+# CallCircle v2.1 — Phone contact picker
+
+- Choose from your Samsung phone contacts on the home screen **or directly from the Add someone form**.
+- Select one or multiple contacts and assign a frequency.
+- Uses original Android application ID `com.hamex.callcircle` and version `0.3.0+3`.
+- **Important:** An in-place update also requires the same signing key. The original builds were created with default temporary debug signing in CI. If Android rejects an in-place update due to a signing mismatch, export a backup from the original app BEFORE removing it; then reinstall and restore the backup. Do not assume changing an app ID alone preserves data.
+- Phone contacts are requested on demand and not transmitted to a server. Only selected entries are saved to CallCircle's app storage.
+
 # CallCircle v2 — Android prototype
 
 A private call reminder app, created for an Android phone. Source for a Flutter Android wrapper around the included mobile UI.

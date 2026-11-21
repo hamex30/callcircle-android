@@ -1,0 +1,19 @@
+name: callcircle
+description: Private reminder app for keeping in touch with family and friends.
+publish_to: none
+version: 0.1.0+1
+environment:
+  sdk: '>=3.5.0 <4.0.0'
+dependencies:
+  flutter:
+    sdk: flutter
+  webview_flutter: 4.14.1
+  url_launcher: ^6.3.2
+  shared_preferences: ^2.5.3
+  flutter_local_notifications: 19.5.0
+  flutter_timezone: 5.1.1
+  timezone: ^0.10.1
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/callcircle.html

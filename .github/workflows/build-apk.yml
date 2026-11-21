@@ -1,0 +1,33 @@
+name: Build CallCircle Android APK
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - uses: android-actions/setup-android@v3
+      - name: Install Android SDK
+        run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
+      - name: Generate Flutter Android project
+        run: flutter create --platforms=android --project-name=callcircle --org=com.hamex .
+      - name: Apply Android notification setup
+        run: python3 tool/prepare_android.py
+      - name: Install dependencies
+        run: flutter pub get
+      - name: Build APK
+        run: flutter build apk --release
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CallCircle-Android-APK
+          path: build/app/outputs/flutter-apk/app-release.apk

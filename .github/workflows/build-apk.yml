@@ -25,9 +25,16 @@ jobs:
         run: flutter create --platforms=android --project-name=callcircle --org=com.hamex .
       - name: Apply Android notification setup
         run: python3 tool/prepare_android.py
+      - name: Configure permanent APK signing
+        env:
+          CALLCIRCLE_KEYSTORE_BASE64: ${{ secrets.CALLCIRCLE_KEYSTORE_BASE64 }}
+          CALLCIRCLE_STORE_PASSWORD: ${{ secrets.CALLCIRCLE_STORE_PASSWORD }}
+        run: python3 tool/configure_signing.py
       - name: Install dependencies
         run: flutter pub get
       - name: Build APK
+        env:
+          CALLCIRCLE_STORE_PASSWORD: ${{ secrets.CALLCIRCLE_STORE_PASSWORD }}
         run: flutter build apk --release
       - uses: actions/upload-artifact@v4
         with:

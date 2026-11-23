@@ -65,3 +65,13 @@ not automatically migrated; if needed, restore a CallCircle backup in v2.
 These are test builds; they are not configured with a stable production signing
 key. For reliable future in-place updates, configure a private release keystore
 using GitHub Actions secrets before distributing the app.
+
+## Permanent Android release signing
+
+For every future build, add two GitHub repository Actions secrets:
+- `CALLCIRCLE_KEYSTORE_BASE64`: Base64 encoding of your private `callcircle-release.jks`
+- `CALLCIRCLE_STORE_PASSWORD`: The signing keystore password (also used as the key password)
+
+The key alias is `callcircle`. The keystore file, its Base64 encoding, and its password must NEVER be committed to this public repository. Keep an encrypted private backup of the keystore and password. When these secrets are missing, the CI build intentionally fails rather than shipping an APK with a temporary signing certificate.
+
+**First-time migration:** The earlier CallCircle APKs were signed using an ephemeral debug signing key. Android cannot update those APKs with a new permanent signing key. Export and verify contacts backup, then uninstall the old app and install the first permanently signed version once. Thereafter, future releases built with this same key and same application ID will update without reinstalling (provided versionCode is increased).

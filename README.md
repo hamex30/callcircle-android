@@ -1,3 +1,14 @@
+# CallCircle v0.4.0 — imo + Other calling app
+
+- **imo** is now a per-person calling option. CallCircle opens the installed official imo app, but does not start a voice call automatically.
+- **Other installed app** lets you select an installed calling app for each person. The selected app name and Android package identifier are stored with that contact, and choosing Call opens the app. Use its own interface to place the call. You can edit or change the app later.
+- Both manual contact entry and bulk phone-contact import support these options.
+- Existing CallCircle contacts, notes, last-called dates, reminders, and other saved calling preferences remain unchanged.
+- The Android app uses the same application ID and GitHub Actions permanent release signing key as v0.3.x for an in-place upgrade.
+- Launcher-app discovery is limited to apps with launchable Android activities. It does not require QUERY_ALL_PACKAGES or uploading a list of installed apps.
+- If imo is not installed, install the official imo app from Google Play (package `com.imo.android.imoim`). The app does not rely on an unverified imo direct-call URL.
+- When a custom app opens, CallCircle copies the saved number to clipboard for convenient pasting into the calling app.
+
 # CallCircle v2.1 — Phone contact picker
 
 - Choose from your Samsung phone contacts on the home screen **or directly from the Add someone form**.

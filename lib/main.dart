@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'contact_import_screen.dart';
+import 'app_picker_screen.dart';
+import 'package:flutter/services.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -38,6 +40,7 @@ class CallCircleHome extends StatefulWidget {
 class _CallCircleHomeState extends State<CallCircleHome> {
   static const _storageKey = 'callcircle_contacts';
   final _notifications = FlutterLocalNotificationsPlugin();
+  static const _appLauncher = MethodChannel('callcircle/app_launcher');
   WebViewController? _web;
   SharedPreferences? _preferences;
   bool _ready = false;
@@ -64,6 +67,13 @@ class _CallCircleHomeState extends State<CallCircleHome> {
       })
       ..addJavaScriptChannel('CallCircleContacts', onMessageReceived: (message) {
         if (message.message == 'import') _importPhoneContacts();
+      })
+      ..addJavaScriptChannel('CallCircleApps', onMessageReceived: (message) {
+        if (message.message == 'pick') {
+          _pickInstalledCallingApp();
+        } else {
+          _launchPreferredCallingApp(message.message);
+        }
       })
       ..setNavigationDelegate(NavigationDelegate(
         onNavigationRequest: (request) {
@@ -109,6 +119,60 @@ class _CallCircleHomeState extends State<CallCircleHome> {
       await _web!.runJavaScript('window.importPhoneContacts($payload);');
     } catch (_) {
       if (mounted) _message('Could not import contacts. Please try again.');
+    }
+  }
+
+
+  Future<void> _pickInstalledCallingApp() async {
+    if (!mounted) return;
+    try {
+      final selected = await Navigator.of(context).push<CallingAppChoice>(
+        MaterialPageRoute(builder: (_) => const InstalledCallingAppPicker()),
+      );
+      if (!mounted || selected == null || _web == null) return;
+      await _web!.runJavaScript(
+        'window.setSelectedCallingApp(${jsonEncode(selected.toJson())});',
+      );
+    } catch (_) {
+      if (mounted) _message('Could not open the installed-app picker.');
+    }
+  }
+
+  Future<void> _launchPreferredCallingApp(String raw) async {
+    try {
+      final values = jsonDecode(raw);
+      if (values is! Map) return;
+      final method = values['method']?.toString() ?? '';
+      final name = method == 'imo'
+          ? 'imo'
+          : (values['customAppName']?.toString() ?? 'selected app');
+      final package = method == 'imo'
+          ? 'com.imo.android.imoim'
+          : method == 'other'
+              ? (values['customAppPackage']?.toString() ?? '')
+              : '';
+      if (package.isEmpty) {
+        if (mounted) _message('Choose a calling app for this person first.');
+        return;
+      }
+      final launched = await _appLauncher.invokeMethod<bool>(
+        'launchApp', <String, String>{'package': package},
+      ) ?? false;
+      if (!launched) {
+        if (mounted) {
+          _message(method == 'imo'
+              ? 'imo is not installed. Install imo from Google Play to use it.'
+              : '$name could not be opened. Check if it is still installed.');
+        }
+        return;
+      }
+      final number = values['phone']?.toString().trim() ?? '';
+      if (number.isNotEmpty) {
+        await Clipboard.setData(ClipboardData(text: number));
+      }
+      // The app opens its normal screen: users initiate the voice call themselves.
+    } catch (_) {
+      if (mounted) _message('Could not open the selected calling app.');
     }
   }
 

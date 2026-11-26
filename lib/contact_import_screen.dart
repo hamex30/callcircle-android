@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'app_picker_screen.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
 
 /// A lightweight copy of only the contact details the user selected.
@@ -10,6 +11,8 @@ class SelectedPhoneContact {
   final String frequency;
   final String method;
   final String relation;
+  final String customAppName;
+  final String customAppPackage;
 
   const SelectedPhoneContact({
     required this.name,
@@ -18,6 +21,8 @@ class SelectedPhoneContact {
     required this.frequency,
     required this.method,
     required this.relation,
+    this.customAppName = '',
+    this.customAppPackage = '',
   });
 
   Map<String, String> toJson() => {
@@ -27,6 +32,8 @@ class SelectedPhoneContact {
         'frequency': frequency,
         'method': method,
         'relation': relation,
+        'customAppName': customAppName,
+        'customAppPackage': customAppPackage,
       };
 }
 
@@ -103,6 +110,8 @@ class _ContactImportScreenState extends State<ContactImportScreen> {
     String frequency = 'weekly';
     String method = 'whatsapp';
     String relation = 'Family';
+    String customAppName = '';
+    String customAppPackage = '';
     final options = await showDialog<Map<String, String>>(
       context: context,
       builder: (dialogContext) => StatefulBuilder(builder: (dialogContext, refresh) {
@@ -141,15 +150,49 @@ class _ContactImportScreenState extends State<ContactImportScreen> {
                 DropdownMenuItem(value: 'whatsapp', child: Text('WhatsApp')),
                 DropdownMenuItem(value: 'whitecalling', child: Text('White Calling')),
                 DropdownMenuItem(value: 'phone', child: Text('Phone')),
+                DropdownMenuItem(value: 'imo', child: Text('imo')),
+                DropdownMenuItem(value: 'other', child: Text('Other installed app')),
               ],
               onChanged: (v) { if (v != null) refresh(() => method = v); },
             ),
+            if (method == 'other') ...[
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                icon: const Icon(Icons.apps),
+                label: Text(customAppPackage.isEmpty
+                    ? 'Choose installed calling app'
+                    : customAppName),
+                onPressed: () async {
+                  final selected = await Navigator.of(dialogContext)
+                      .push<CallingAppChoice>(MaterialPageRoute(
+                          builder: (_) => const InstalledCallingAppPicker()));
+                  if (dialogContext.mounted && selected != null) {
+                    refresh(() {
+                      customAppName = selected.name;
+                      customAppPackage = selected.packageName;
+                    });
+                  }
+                },
+              ),
+              const SizedBox(height: 4),
+              const Text('The selected app will open, then you start the call.',
+                  style: TextStyle(fontSize: 12)),
+            ],
           ])),
           actions: [
             TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Cancel')),
-            FilledButton(onPressed: () => Navigator.pop(dialogContext, {
-              'frequency': frequency, 'relation': relation, 'method': method,
-            }), child: const Text('Import')),
+            FilledButton(
+              onPressed: method == 'other' && customAppPackage.isEmpty
+                  ? null
+                  : () => Navigator.pop(dialogContext, {
+                      'frequency': frequency,
+                      'relation': relation,
+                      'method': method,
+                      'customAppName': customAppName,
+                      'customAppPackage': customAppPackage,
+                    }),
+              child: const Text('Import'),
+            ),
           ],
         );
       }),
@@ -163,6 +206,8 @@ class _ContactImportScreenState extends State<ContactImportScreen> {
         frequency: options['frequency']!,
         method: options['method']!,
         relation: options['relation']!,
+        customAppName: options['customAppName'] ?? '',
+        customAppPackage: options['customAppPackage'] ?? '',
       );
     }).toList();
     Navigator.pop(context, choices);
